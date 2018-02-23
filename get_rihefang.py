@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 from PIL import ImageGrab
 import time
+import pyautogui
 
 deltaX = 945 - 485
 deltaY = 224 - 196
@@ -16,6 +17,9 @@ target = cwd + '/img/rihefang_target.png'
 template = cv2.imread(target, 0)
 # width, hight = template.shape[::-1]
 tmpPicName = cwd + '/tmp.png'
+
+def refreshSrceen():
+	pyautogui.click(x=refreshBtnX, y=refreshBtnY, button='left')
 
 def grabPic():
 	im = ImageGrab.grab()
@@ -35,12 +39,14 @@ def mainFunc():
 		loc = getLoccation(tmpPicName, threshold)
 		t = list(loc)
 		if len(t) <= 0:
+			refreshSrceen()
 			time.sleep(1)
 			continue
 		else:
 			clickX = t[0][0] + deltaX
 			clickY = t[0][1] + deltaY
-			print (clickX, clickY)
+			print("find: ", clickX, clickX)
+			pyautogui.click(x=clickX, y=clickY, button='left')
 			break
 
 mainFunc()
