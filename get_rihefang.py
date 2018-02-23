@@ -35,11 +35,11 @@ def getLoccation(image, threshold):
 
 def mainFunc():
 	while True:
+		refreshSrceen()
 		grabPic()
 		loc = getLoccation(tmpPicName, threshold)
 		t = list(loc)
 		if len(t) <= 0:
-			refreshSrceen()
 			time.sleep(1)
 			continue
 		else:
