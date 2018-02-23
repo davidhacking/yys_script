@@ -8,6 +8,8 @@ import time
 
 deltaX = 945 - 485
 deltaY = 224 - 196
+refreshBtnX = 446
+refreshBtnY = 588
 threshold = 0.9
 cwd = os.getcwd()
 target = cwd + '/img/rihefang_target.png'
@@ -31,12 +33,13 @@ def mainFunc():
 	while True:
 		grabPic()
 		loc = getLoccation(tmpPicName, threshold)
-		if loc == None or len(loc) <= 0:
+		t = list(loc)
+		if len(t) <= 0:
 			time.sleep(1)
 			continue
 		else:
-			clickX = loc[0] + deltaX
-			clickY = loc[1] + deltaY
+			clickX = t[0][0] + deltaX
+			clickY = t[0][1] + deltaY
 			print (clickX, clickY)
 			break
 
