@@ -8,7 +8,10 @@ import time
 import pyautogui
 import math
 import sys
-import _thread
+import thread
+# import pythoncom
+# import pyHook
+import time
 
 deltaX = 945 - 485
 deltaY = 224 - 196
@@ -24,6 +27,28 @@ template = cv2.imread(target, 0)
 readyTemplate = cv2.imread(readyTarget, 0)
 # width, hight = template.shape[::-1]
 tmpPicName = cwd + '/tmp.png'
+
+steps = {
+	'zuidui': {
+		'x': 225,
+		'y': 601,
+		'img': cv2.imread(cwd + '/img/zudui.png', 0),
+	},
+	'all_ready': {
+		'img': cv2.imread(cwd + '/img/all_ready.png', 0),
+	},
+	'yaoqifengyin': {
+		'x': 219,
+		'y': 555,
+		'img': cv2.imread(cwd + '/img/yaoqifengyin.png', 0),
+	},
+	'yaoqi_result': {
+		'img': cv2.imread(cwd + '/img/yaoqi_result.png', 0),
+	},
+	'tuichu': {
+		'img': cv2.imread(cwd + '/img/tuichu.png', 0),
+	},
+}
 
 def distance(px, py):
 	cx, cy = pyautogui.position()
@@ -54,7 +79,7 @@ def joinFunc():
 	pyautogui.moveTo(refreshBtnX, refreshBtnY, duration=0.1)
 	clickX = refreshBtnX
 	clickY = refreshBtnY
-	while True:
+	while isHitTarget(steps['tuichu']['img'], threshold) is False:
 		if distance(refreshBtnX, refreshBtnY) > 20 and distance(clickX, clickY) > 20:
 			break
 		mouseClick(refreshBtnX, refreshBtnY)
@@ -72,21 +97,50 @@ def joinFunc():
 			time.sleep(0.1)
 			# break
 
+
 def startFunc():
 	while isHitTarget(readyTemplate, threshold) is False:
 		time.sleep(2)
-	clickTimes = 5
-	while clickTimes > 0:
+	while isHitTarget(steps['all_ready']['img'], threshold) is False:
+		time.sleep(0.2)
 		mouseClick(readyX, readyY)
-		clickTimes = clickTimes - 1
+
+def clickZuidui():
+	while isHitTarget(steps['zuidui']['img'], threshold) is False:
 		time.sleep(1)
-	sys.exit(0)
+	while isHitTarget(steps['yaoqifengyin']['img'], threshold) is False:
+		time.sleep(0.2)
+		mouseClick(steps['zuidui']['x'], steps['zuidui']['y'])
+	pass
 
+def clickYaoqifengyin():
+	while isHitTarget(steps['yaoqifengyin']['img'], threshold) is False:
+		time.sleep(1)
+	while isHitTarget(steps['yaoqi_result']['img'], threshold) is False:
+		time.sleep(0.2)
+		mouseClick(steps['yaoqifengyin']['x'], steps['yaoqifengyin']['y'])
+	pass
 
-# try:
-_thread.start_new_thread(joinFunc, ())
-startFunc()
-# except:
-# 	print("start thread exception")
-# 	pass
+def gotoHome():
+	while isHitTarget(steps['zuidui']['img'], threshold) is False:
+		mouseClick(readyX, readyY)
+		time.sleep(1)
+	pass
+
+def onKeyboardEvent(event):
+	print event.Key
+
+# thread.start_new_thread(joinFunc, ())
+# startFunc()
+
+# hm = pyHook.HookManager()
+# hm.KeyDown = onKeyboardEvent
+# hm.HookKeyboard()
+
+while True:
+	clickZuidui()
+	clickYaoqifengyin()
+	joinFunc()
+	startFunc()
+	gotoHome()
 
