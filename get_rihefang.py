@@ -21,7 +21,7 @@ readyX = 1045
 readyY = 524
 threshold = 0.9
 cwd = os.getcwd()
-target = cwd + '/img/rihefang_target.png'
+target = cwd + '/img/guishihei.png'
 readyTarget = cwd + '/img/ready_target.png'
 template = cv2.imread(target, 0)
 readyTemplate = cv2.imread(readyTarget, 0)
@@ -36,6 +36,9 @@ steps = {
 	},
 	'all_ready': {
 		'img': cv2.imread(cwd + '/img/all_ready.png', 0),
+	},
+	'start1': {
+		'img': cv2.imread(cwd + '/img/start1.png', 0),
 	},
 	'yaoqifengyin': {
 		'x': 219,
@@ -76,12 +79,12 @@ def getLoccation(template, threshold):
 	return zip(*loc[::-1])
 
 def joinFunc():
-	pyautogui.moveTo(refreshBtnX, refreshBtnY, duration=0.1)
-	clickX = refreshBtnX
-	clickY = refreshBtnY
+	# pyautogui.moveTo(refreshBtnX, refreshBtnY, duration=0.1)
+	# clickX = refreshBtnX
+	# clickY = refreshBtnY
 	while isHitTarget(steps['tuichu']['img'], threshold) is False:
-		if distance(refreshBtnX, refreshBtnY) > 20 and distance(clickX, clickY) > 20:
-			break
+		# if distance(refreshBtnX, refreshBtnY) > 20 and distance(clickX, clickY) > 20:
+		# 	break
 		mouseClick(refreshBtnX, refreshBtnY)
 		time.sleep(0.07)
 		loc = getLoccation(template, threshold)
@@ -101,7 +104,7 @@ def joinFunc():
 def startFunc():
 	while isHitTarget(readyTemplate, threshold) is False:
 		time.sleep(2)
-	while isHitTarget(steps['all_ready']['img'], threshold) is False:
+	while isHitTarget(steps['all_ready']['img'], threshold) is False and isHitTarget(steps['start1']['img'], threshold) is False:
 		time.sleep(0.2)
 		mouseClick(readyX, readyY)
 
@@ -123,7 +126,8 @@ def clickYaoqifengyin():
 
 def gotoHome():
 	while isHitTarget(steps['zuidui']['img'], threshold) is False:
-		mouseClick(readyX, readyY)
+		# click blank
+		mouseClick(769, 319)
 		time.sleep(1)
 	pass
 
