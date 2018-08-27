@@ -137,7 +137,7 @@ def get_curr_status():
 				do_something(key)
 				pass
 			pass
-		time.sleep(0.3)
+		time.sleep(round(random.uniform(0.05, 0.1), 2))
 	pass
 
 
