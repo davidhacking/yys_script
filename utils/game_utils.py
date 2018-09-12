@@ -7,15 +7,20 @@ import numpy as np
 import time
 import random
 import pyautogui
+
 pyautogui.FAILSAFE = False
+
+max_times = 50
 
 
 def random_click_with_icon(icon, x, y, range_x, range_y):
-	t = getLoccation(cv2.imread(icon, 0), 0.6)
-	while not isHitTarget(t):
+	t = get_location(cv2.imread(icon, 0), 0.6)
+	times = 0
+	while not is_hit_target(t) and times < max_times:
+		times += 1
 		print "random_click_with_icon: icon not found"
 		time.sleep(0.5)
-		t = getLoccation(cv2.imread(icon, 0), 0.6)
+		t = get_location(cv2.imread(icon, 0), 0.6)
 	loc = t[0]
 	random_click_top_left((loc[0] + x, loc[1] + y), (range_x, range_y))
 	pass
@@ -35,11 +40,13 @@ def random_click_top_left(top_left, rect):
 
 
 def click_img(img, threshold=0.8):
-	t = getLoccation(cv2.imread(img, 0), threshold)
-	while not isHitTarget(t):
+	t = get_location(cv2.imread(img, 0), threshold)
+	times = 0
+	while not is_hit_target(t) and times < max_times:
+		times += 1
 		print "click_img: target not found"
 		time.sleep(0.5)
-		t = getLoccation(cv2.imread(img, 0), 0.6)
+		t = get_location(cv2.imread(img, 0), 0.6)
 	loc = t[0]
 	shape = read_img_shape(img)
 	random_click_top_left(loc, shape)
@@ -61,7 +68,7 @@ def sort_keys(conf):
 	pass
 
 
-def getLoccation(template, threshold):
+def get_location(template, threshold):
 	imgRgb = np.array(ImageGrab.grab().convert('RGB'))
 	imgGray = cv2.cvtColor(imgRgb, cv2.COLOR_BGR2GRAY)
 	res = cv2.matchTemplate(imgGray, template, cv2.TM_CCOEFF_NORMED)
@@ -69,7 +76,7 @@ def getLoccation(template, threshold):
 	return zip(*loc[::-1])
 
 
-def isHitTarget(loc):
+def is_hit_target(loc):
 	t = list(loc)
 	if len(t) > 0:
 		return t[0][0], t[0][1]
@@ -78,8 +85,8 @@ def isHitTarget(loc):
 
 
 def read_img_shape(img):
-	return cv2.imread(img, 0).shape
-	pass
+	shape = cv2.imread(img, 0).shape
+	return (shape[1], shape[0])
 
 
 def get_curr_status(config):
@@ -90,10 +97,10 @@ def get_curr_status(config):
 				continue
 			# print "key: ", key
 			if 'threshold' not in config[key]:
-				t = getLoccation(cv2.imread(config[key]['img'], 0), 0.8)
+				t = get_location(cv2.imread(config[key]['img'], 0), 0.8)
 			else:
-				t = getLoccation(cv2.imread(config[key]['img'], 0), config[key]['threshold'])
-			if isHitTarget(t):
+				t = get_location(cv2.imread(config[key]['img'], 0), config[key]['threshold'])
+			if is_hit_target(t):
 				# return key
 				print key
 				do_something(config, key)
@@ -106,7 +113,8 @@ def get_curr_status(config):
 def do_action_list(action_list):
 	for action in action_list:
 		if 'click_until_img' == action['func']:
-			click_until_img(conf.yys_icon, action['x'], action['y'], action['range_x'], action['range_y'], action['img'])
+			click_until_img(conf.yys_icon, action['x'], action['y'], action['range_x'], action['range_y'],
+							action['img'])
 			pass
 		if action['func'] == 'click_img':
 			if 'threshold' in action:
@@ -121,8 +129,69 @@ def do_action_list(action_list):
 			elif 'until_threshold' in action:
 				click_img_until_img(action['img'], action['until_img'], until_threshold=action['until_threshold'])
 		if action['func'] == 'random_swipe_with_icon':
-			random_swipe_with_icon(conf.yys_icon, action['from_pos'], action['from_range'], action['to_pos'], action['to_range'])
+			random_swipe_with_icon(conf.yys_icon, action['from_pos'], action['from_range'], action['to_pos'],
+								   action['to_range'])
 		pass
+	pass
+
+
+def find_target_num(img, threshold=0.8, next_action=None):
+	temp = cv2.imread(img, 0)
+	target = get_location(temp, threshold)
+	if not target or type(target) != list or len(target) <= 0:
+		return None
+	target_num = len(target)
+	print "find_target_num: ", target_num
+	if not next_action:
+		return None
+	target_num = str(target_num)
+	if target_num in next_action:
+		return next_action[target_num]
+	else:
+		return next_action['default']
+	pass
+
+
+def do_action_obj(action_obj, id='init'):
+	def ret_next(action, next_action):
+		if 'next' in action:
+			return action['next']
+		return next_action if next_action else 'finish'
+		pass
+
+	def _do_action(action):
+		next_action = 'finish'
+		if not action:
+			return next_action
+		if 'click_until_img' == action['func']:
+			next_action = click_until_img(conf.yys_icon, action['x'], action['y'], action['range_x'], action['range_y'],
+										  action['img'])
+			pass
+		elif action['func'] == 'click_img':
+			if 'threshold' in action:
+				next_action = click_img(action['img'], action['threshold'])
+			else:
+				next_action = click_img(action['img'])
+		elif action['func'] == 'click_img_until_img':
+			if 'threshold' in action and 'until_threshold' in action:
+				next_action = click_img_until_img(action['img'], action['until_img'], action['threshold'],
+												  action['until_threshold'])
+			elif 'threshold' in action:
+				next_action = click_img_until_img(action['img'], action['until_img'], action['threshold'])
+			elif 'until_threshold' in action:
+				next_action = click_img_until_img(action['img'], action['until_img'],
+												  until_threshold=action['until_threshold'])
+		elif action['func'] == 'random_swipe_with_icon':
+			next_action = random_swipe_with_icon(conf.yys_icon, action['from_pos'], action['from_range'],
+												 action['to_pos'],
+												 action['to_range'])
+		elif 'find_target_num' == action['func']:
+			next_action = find_target_num(action['img'], action['threshold'], action['next_action'])
+		return ret_next(action, next_action)
+		pass
+
+	while id != 'finish':
+		id = _do_action(action_obj.get(id, None))
 	pass
 
 
@@ -141,16 +210,21 @@ def do_something(config, key):
 				click_img(config[key]['click_img_param'])
 	if config[key]['action'] == 'random_click_with_icon':
 		random_click_with_icon(conf.yys_icon, config[key]['x'], config[key]['y'],
-								config[key]['range_x'], config[key]['range_y'])
+							   config[key]['range_x'], config[key]['range_y'])
 	if config[key]['action'] == 'do_action_list':
 		do_action_list(config[key]['action_list'])
+		pass
+	if config[key]['action'] == 'do_action_obj':
+		do_action_obj(config[key]['action_obj'])
 		pass
 	pass
 
 
 def click_until_img(icon, x, y, range_x, range_y, img):
 	temp = cv2.imread(img, 0)
-	while not isHitTarget(getLoccation(temp, 0.8)):
+	times = 0
+	while not is_hit_target(get_location(temp, 0.8)) and times < max_times:
+		times += 1
 		random_click_with_icon(icon, x, y, range_x, range_y)
 		time.sleep(0.5)
 	pass
@@ -158,7 +232,9 @@ def click_until_img(icon, x, y, range_x, range_y, img):
 
 def click_img_until_img(img, until_img, threshold=0.8, until_threshold=0.8):
 	temp = cv2.imread(until_img, 0)
-	while not isHitTarget(getLoccation(temp, threshold)):
+	times = 0
+	while not is_hit_target(get_location(temp, threshold)) and times < max_times:
+		times += 1
 		click_img(img, until_threshold)
 		time.sleep(0.5)
 	time.sleep(1)
@@ -166,11 +242,13 @@ def click_img_until_img(img, until_img, threshold=0.8, until_threshold=0.8):
 
 
 def random_swipe_with_icon(icon, from_pos, from_range, to_pos, to_range):
-	t = getLoccation(cv2.imread(icon, 0), 0.6)
-	while not isHitTarget(t):
+	t = get_location(cv2.imread(icon, 0), 0.6)
+	times = 0
+	while not is_hit_target(t) and times < max_times:
+		times += 1
 		print "random_click_with_icon: icon not found"
 		time.sleep(0.5)
-		t = getLoccation(cv2.imread(icon, 0), 0.6)
+		t = get_location(cv2.imread(icon, 0), 0.6)
 	loc = t[0]
 	pos1_x, pos1_y = get_random_pos((from_pos[0] + loc[0], from_pos[1] + loc[1]), from_range)
 	pos2_x, pos2_y = get_random_pos((to_pos[0] + loc[0], to_pos[1] + loc[1]), to_range)
@@ -187,5 +265,4 @@ def swipe(pos1, pos2):
 
 
 if __name__ == "__main__":
-	swipe((0, 0), (500, 500))
 	pass

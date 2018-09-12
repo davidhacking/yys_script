@@ -121,7 +121,8 @@ def isHitTarget(loc):
 
 
 def read_img_shape(img):
-	return cv2.imread(img, 0).shape
+	shape = cv2.imread(img, 0).shape
+	return (shape[1], shape[0])
 	pass
 
 
