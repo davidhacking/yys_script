@@ -165,7 +165,7 @@ config = {
 		'img': conf.kun25_img + os.sep + 'continue_game.png',
 		'x': 827,
 		'y': 357,
-		'range_x': -827 + 1031,
+		'range_x': -827 + 900,
 		'range_y': -357 + 505,
 		'action': 'random_click_with_icon'
 	},

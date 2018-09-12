@@ -47,6 +47,8 @@ def click_img(img, threshold=0.8):
 		print "click_img: target not found"
 		time.sleep(0.5)
 		t = get_location(cv2.imread(img, 0), 0.6)
+	if times >= max_times:
+		return
 	loc = t[0]
 	shape = read_img_shape(img)
 	random_click_top_left(loc, shape)
@@ -63,8 +65,8 @@ def sort_keys(conf):
 			level = conf[key]['level']
 		kdict[key] = level
 		pass
-	sorted(kdict.items(), key=lambda item: item[1])
-	return kdict.keys()
+	kdict_keys = sorted(kdict.items(), key=lambda item: item[1])
+	return [k for k, l in kdict_keys]
 	pass
 
 
@@ -91,6 +93,7 @@ def read_img_shape(img):
 
 def get_curr_status(config):
 	config_keys = sort_keys(config)
+	print config_keys
 	while True:
 		for key in config_keys:
 			if 'img' not in config[key]:
