@@ -13,7 +13,7 @@ config = {
 		'action': 'click_img',
 	},
 	'25zhang': {
-		'img': conf.kun25_img + os.sep + '26zhang.png',
+		'img': conf.kun25_img + os.sep + '28zhang.png',
 		'action': 'click_img',
 		'threshold': 0.95,
 	},
@@ -21,11 +21,11 @@ config = {
 		'img': conf.kun25_img + os.sep + 'tansuo_btn.png',
 		'action': 'click_img',
 	},
-	'play_normal12': {
-		'level': 24,
-		'img': conf.kun25_img + os.sep + 'play_normal2.png',
-		'action': 'click_img',
-	},
+	# 'play_normal12': {
+	# 	'level': 24,
+	# 	'img': conf.kun25_img + os.sep + 'play_normal2.png',
+	# 	'action': 'click_img',
+	# },
 	'play_normal1': {
 		'level': 23,
 		'img': conf.kun25_img + os.sep + 'play_normal1.png',
@@ -49,7 +49,7 @@ config = {
 			'init': {
 				'func': 'find_target_num',
 				'img': conf.kun25_img + os.sep + 'max_level.png',
-				'threshold': 0.77,
+				'threshold': 0.69,
 				'next_action': {
 					'1': '5',
 					'2': '0',
@@ -77,7 +77,7 @@ config = {
 				'img': conf.kun25_img + os.sep + 'n_card_btn.png',
 				'threshold': 0.9,
 				'func': 'click_img_until_img',
-				'until_img': conf.kun25_img + os.sep + 'huahua.png',
+				'until_img': conf.kun25_img + os.sep + 'huahua.png', # 别用晴明皮肤
 				'until_threshold': 0.8,
 				'next': '3',
 			},

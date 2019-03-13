@@ -10,7 +10,7 @@ import pyautogui
 
 pyautogui.FAILSAFE = False
 
-max_times = 50
+max_times = 10
 
 
 def random_click_with_icon(icon, x, y, range_x, range_y):
@@ -44,7 +44,7 @@ def click_img(img, threshold=0.8):
 	times = 0
 	while not is_hit_target(t) and times < max_times:
 		times += 1
-		print "click_img: target not found"
+		print "click_img: target not found", img
 		time.sleep(0.5)
 		t = get_location(cv2.imread(img, 0), 0.6)
 	if times >= max_times:
@@ -91,7 +91,7 @@ def read_img_shape(img):
 	return (shape[1], shape[0])
 
 
-def get_curr_status(config):
+def get_curr_status(config, sleep_time=None):
 	config_keys = sort_keys(config)
 	print config_keys
 	while True:
@@ -109,12 +109,18 @@ def get_curr_status(config):
 				do_something(config, key)
 				pass
 			pass
-		time.sleep(round(random.uniform(0.05, 0.1), 2))
+		if sleep_time is None:
+			time.sleep(round(random.uniform(0.05, 0.1), 2))
+		else:
+			time.sleep(sleep_time)
 	pass
 
 
 def do_action_list(action_list):
 	for action in action_list:
+		if type(action).__name__ == 'function':
+			action()
+			continue
 		if 'click_until_img' == action['func']:
 			click_until_img(conf.yys_icon, action['x'], action['y'], action['range_x'], action['range_y'],
 							action['img'])
